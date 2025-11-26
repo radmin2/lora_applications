@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from transformers import DistilBertTokenizer, DistilBertForSequenceClassification, get_linear_schedule_with_warmup
+from transformers import get_cosine_schedule_with_warmup
 from datasets import load_dataset, load_from_disk
 from tqdm.auto import tqdm
 import numpy as np
@@ -128,7 +129,7 @@ def apply_lora(model, rank=8, alpha=16):
     return model
 
 # ==========================================
-# 4. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+# 4. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ 
 # ==========================================
 def evaluate_accuracy(model, loader):
     """Быстрый подсчет Accuracy"""
@@ -340,13 +341,13 @@ if __name__ == "__main__":
 
     evaluator = ModelEvaluator(save_dir=os.path.join(RESULTS_DIR, "final_metrics"))
     
-    lambdas = [0.0625, 1, 16] 
+    lambdas = [1, 1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128, 1/256] 
     all_results = {}
     all_epoch_metrics = {}
     
-    EPOCHS = 10
-    BASE_LR = 1e-4
-    EVAL_EVERY_N_STEPS = 100
+    EPOCHS = 2
+    BASE_LR = 1e-5
+    EVAL_EVERY_N_STEPS = 10
 
     for lam in lambdas:
         hist, trained_model = run_lora_plus(
